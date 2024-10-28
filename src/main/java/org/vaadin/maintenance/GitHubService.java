@@ -33,6 +33,8 @@ public class GitHubService {
 
     public static final String OWNER = "vaadin";
 
+    private static final int ISSUES_NUMBER = 50;
+
     public List<Issue> getOpenPullRequests(String repo)
             throws IOException, InterruptedException, JSONException {
         String url = GITHUB_API_URL + OWNER + "/" + repo + "/pulls";
@@ -53,7 +55,7 @@ public class GitHubService {
 
     public List<Issue> getOpenIssues(String repo)
             throws IOException, InterruptedException {
-        String url = GITHUB_API_URL + OWNER + "/" + repo + "/issues?state=open&per_page=100&page=1";
+        String url = GITHUB_API_URL + OWNER + "/" + repo + "/issues?state=open&per_page=" + ISSUES_NUMBER + "&page=1";
 
         HttpResponse<String> response = fetch(url);
 

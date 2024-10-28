@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.accordion.Accordion;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -29,6 +30,8 @@ public class IssuesView extends VerticalLayout {
 
     private final GitHubService github;
 
+    private Button fetch;
+
     public IssuesView(@Autowired GitHubService github) {
         this.github = github;
 
@@ -44,14 +47,20 @@ public class IssuesView extends VerticalLayout {
         });
 
         add(filters);
+
         accordion.setSizeFull();
 
-        try {
-            renderIssues(new Filter());
-        } catch (IOException e) {
-            getLogger().error(e.getMessage(), e);
-            showErrorNotification(e);
-        }
+        fetch = new Button("Fetch issues", click -> {
+            try {
+                renderIssues(new Filter());
+                fetch.setVisible(false);
+            } catch (IOException e) {
+                getLogger().error(e.getMessage(), e);
+                showErrorNotification(e);
+            }
+        });
+
+        add(fetch);
     }
 
     private static void showErrorNotification(IOException e) {
@@ -79,6 +88,7 @@ public class IssuesView extends VerticalLayout {
 
         filterIssues.entrySet().stream().sorted(Comparator.comparingLong(entry ->
                         ((Map.Entry<String, List<Issue>>) entry).getValue().size()).reversed())
+                .filter(entry -> !entry.getValue().isEmpty())
                 .forEach(entry -> {
                     RepoPanel repoPanel = new RepoPanel(entry, IssueType.ISSUES);
                     accordion.add(repoPanel);

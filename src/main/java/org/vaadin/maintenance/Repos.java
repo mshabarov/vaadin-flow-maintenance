@@ -5,10 +5,18 @@ import java.util.List;
 public class Repos {
     public static final List<String> REPOS = List.of(
             "flow",
-            "spring", "cdi", "quarkus", "osgi", "portlet", "testbench",
-            "multiplatform-runtime-internal", "license-checker-vaadin10",
-            "docs",
+            "spring",
+            "cdi",
+            "quarkus",
+            "osgi",
+            "portlet",
+            "testbench",
+            "multiplatform-runtime-internal",
+            "license-checker-vaadin10",
+            "docs"
+    );
 
+    public static final List<String> STARTERS = List.of(
             "skeleton-starter-flow",
             "skeleton-starter-flow-cdi",
             "skeleton-starter-flow-spring",
@@ -28,7 +36,6 @@ public class Repos {
             "form-filler-demo",
             "base-starter-flow-webpush",
             "patient-portal-demo-flow",
-            "form-filler-addon",
-            "designer-internal"
+            "form-filler-addon"
     );
 }

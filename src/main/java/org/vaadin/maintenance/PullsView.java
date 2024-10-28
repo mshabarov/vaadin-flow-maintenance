@@ -3,6 +3,7 @@ package org.vaadin.maintenance;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.accordion.Accordion;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -31,6 +33,8 @@ public class PullsView extends VerticalLayout {
     private Map<String, List<Issue>> pulls;
 
     private final GitHubService github;
+
+    private Button fetch;
 
     public PullsView(@Autowired GitHubService github) {
         this.github = github;
@@ -50,12 +54,19 @@ public class PullsView extends VerticalLayout {
         add(filters);
         accordion.setSizeFull();
 
-        try {
-            renderPulls(new Filter());
-        } catch (IOException e) {
-            getLogger().error(e.getMessage(), e);
-            showErrorNotification(e);
-        }
+
+
+        fetch = new Button("Fetch pulls", click -> {
+            try {
+                renderPulls(new Filter());
+                fetch.setVisible(false);
+            } catch (IOException e) {
+                getLogger().error(e.getMessage(), e);
+                showErrorNotification(e);
+            }
+        });
+
+        add(fetch);
     }
 
     private static void showErrorNotification(Exception e) {
@@ -112,7 +123,9 @@ public class PullsView extends VerticalLayout {
     }
 
     private void fetchPulls() {
-        Repos.REPOS.forEach(repo -> {
+        List<String> repos = new ArrayList<>(Repos.REPOS);
+        repos.addAll(Repos.STARTERS);
+        repos.forEach(repo -> {
             try {
                 pulls.put(repo, github.getOpenPullRequests(repo));
             } catch (IOException | InterruptedException | JSONException e) {
