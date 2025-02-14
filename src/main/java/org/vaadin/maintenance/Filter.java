@@ -8,12 +8,14 @@ public class Filter {
     private Instant updatedAt;
     private Status status;
     private boolean hideDraft;
+    private boolean withStarters;
 
     public Filter() {
         createdAt = Instant.now().minus(10000, ChronoUnit.DAYS);
         updatedAt = Instant.now().minus(10000, ChronoUnit.DAYS);
         status = Status.ALL;
         hideDraft = false;
+        withStarters = false;
     }
 
     public Instant getCreatedAt() {
@@ -44,7 +46,15 @@ public class Filter {
         return hideDraft;
     }
 
+    public boolean isWithStarters() {
+        return withStarters;
+    }
+
     public void setHideDraft(boolean hideDraft) {
         this.hideDraft = hideDraft;
+    }
+
+    public void setWithStarters(Boolean withStarters) {
+        this.withStarters = withStarters;
     }
 }

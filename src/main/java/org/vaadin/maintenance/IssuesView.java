@@ -3,6 +3,7 @@ package org.vaadin.maintenance;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -72,7 +75,7 @@ public class IssuesView extends VerticalLayout {
     private void renderIssues(Filter filter) throws IOException {
         if (issues == null) {
             issues = new HashMap<>();
-            fetchPulls();
+            fetchIssues(filter.isWithStarters());
         }
 
         Map<String, List<Issue>> filterIssues = filterIssues(filter);
@@ -96,13 +99,18 @@ public class IssuesView extends VerticalLayout {
 
     }
 
-    private void fetchPulls() {
-        Repos.REPOS.forEach(repo -> {
+    private void fetchIssues(boolean withStarters) {
+        List<String> repos = new ArrayList<>(Repos.REPOS);
+        if (withStarters) {
+            repos.addAll(Repos.STARTERS);
+        }
+
+        repos.forEach(repo -> {
             try {
                 issues.put(repo, github.getOpenIssues(repo));
             } catch (IOException | InterruptedException e) {
-                getLogger().error(e.getMessage(), e);
-                Notification.show("Could not fetch pull requests");
+                getLogger().error("Could not fetch issues from repo {}, error: {}", repo, e.getMessage(), e);
+                showErrorNotification(repo);
             }
         });
     }
@@ -128,5 +136,12 @@ public class IssuesView extends VerticalLayout {
 
     private static Logger getLogger() {
         return LoggerFactory.getLogger(IssuesView.class);
+    }
+
+    private static void showErrorNotification(String url) {
+        Notification notification = new Notification("Could not fetch issues");
+        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        notification.setDuration(0);
+        notification.add(new Anchor(url, "Open in a new tab", AnchorTarget.BLANK));
     }
 }

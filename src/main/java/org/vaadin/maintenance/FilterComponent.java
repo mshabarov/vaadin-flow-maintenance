@@ -16,7 +16,8 @@ public class FilterComponent extends FormLayout {
     private Select<String> createdAt = new Select<>();
     private Select<String> updatedAt = new Select<>();
     private Select<Status> status = new Select<>();
-    private Checkbox draft = new Checkbox();
+    private Checkbox draft = new Checkbox(true);
+    private Checkbox withStarters = new Checkbox(true);
     private Button reset = new Button("Reset");
     private Filter filter = new Filter();
 
@@ -25,7 +26,8 @@ public class FilterComponent extends FormLayout {
         setColspan(createdAt, 1);
         setColspan(updatedAt, 1);
         setColspan(status, 1);
-        setColspan(draft, 2);
+        setColspan(draft, 1);
+        setColspan(withStarters, 1);
         setColspan(reset, 1);
         getElement().getStyle().setBorder("1px solid lightgray");
         getElement().getStyle().setBorderRadius("10px");
@@ -33,6 +35,7 @@ public class FilterComponent extends FormLayout {
         getElement().getStyle().setMargin("10px");
 
         createdAt.setItems("Last day", "Last 3 days", "Last week", "Last month", "All");
+        createdAt.setValue("Last week");
 
         createdAt.setLabel("Filter by creation date:");
         createdAt.addValueChangeListener(event -> {
@@ -53,6 +56,7 @@ public class FilterComponent extends FormLayout {
 
         updatedAt.setLabel("Filter by update date:");
         updatedAt.setItems("Last day", "Last 3 days", "Last week", "Last month", "All");
+        updatedAt.setValue("Last week");
         updatedAt.addValueChangeListener(event -> {
 
             long daysToSubtract = switch (event.getValue()) {
@@ -76,12 +80,14 @@ public class FilterComponent extends FormLayout {
             filter.setStatus(event.getValue());
             fireEvent(new FilterEvent(this, filter));
         });
+        status.setValue(Status.NEW);
 
         reset.addClickListener(click -> {
             createdAt.clear();
             updatedAt.clear();
             status.clear();
             draft.clear();
+            withStarters.clear();
             filter = new Filter();
             fireEvent(new FilterEvent(this, filter));
         });
@@ -94,7 +100,13 @@ public class FilterComponent extends FormLayout {
            fireEvent(new FilterEvent(this, filter));
         });
 
-        add(createdAt, updatedAt, status, draft, reset);
+        withStarters.setLabel("With starters");
+        withStarters.addValueChangeListener(event -> {
+            filter.setWithStarters(event.getValue());
+            fireEvent(new FilterEvent(this, filter));
+        });
+
+        add(createdAt, updatedAt, status, draft, withStarters, reset);
     }
 
     public Registration addFilterListener(

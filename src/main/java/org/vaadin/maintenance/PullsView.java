@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -79,7 +81,7 @@ public class PullsView extends VerticalLayout {
     private void renderPulls(Filter filter) throws IOException {
         if (pulls == null) {
             pulls = new HashMap<>();
-            fetchPulls();
+            fetchPulls(filter.isWithStarters());
         }
 
         Map<String, List<Issue>> filteredPulls = filterPulls(filter);
@@ -122,17 +124,26 @@ public class PullsView extends VerticalLayout {
         return filtered;
     }
 
-    private void fetchPulls() {
+    private void fetchPulls(boolean withStarters) {
         List<String> repos = new ArrayList<>(Repos.REPOS);
-        repos.addAll(Repos.STARTERS);
+        if (withStarters) {
+            repos.addAll(Repos.STARTERS);
+        }
         repos.forEach(repo -> {
             try {
                 pulls.put(repo, github.getOpenPullRequests(repo));
             } catch (IOException | InterruptedException | JSONException e) {
                 getLogger().error(e.getMessage(), e);
-                showErrorNotification(e);
+                showErrorNotification(repo);
             }
         });
+    }
+
+    private static void showErrorNotification(String url) {
+        Notification notification = new Notification("Could not fetch pull request");
+        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        notification.setDuration(0);
+        notification.add(new Anchor(url, "Open in a new tab", AnchorTarget.BLANK));
     }
 
     private static Logger getLogger() {
