@@ -1,5 +1,7 @@
 package org.vaadin.maintenance;
 
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -103,10 +105,14 @@ public class FilterComponent extends FormLayout {
         withStarters.setLabel("With starters");
         withStarters.addValueChangeListener(event -> {
             filter.setWithStarters(event.getValue());
-            fireEvent(new FilterEvent(this, filter));
+            // do not trigger an initial fetch when this is ticked
         });
 
-        add(createdAt, updatedAt, status, draft, withStarters, reset);
+        add(createdAt, updatedAt, status, draft, withStarters);
+        add(new HorizontalLayout(reset) {{
+            getStyle().set("justify-content", "flex-end");
+            setWidthFull();
+        }});
     }
 
     public Registration addFilterListener(

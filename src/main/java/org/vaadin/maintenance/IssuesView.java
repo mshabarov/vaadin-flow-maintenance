@@ -15,11 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -62,8 +64,14 @@ public class IssuesView extends VerticalLayout {
                 showErrorNotification(e);
             }
         });
+        fetch.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
-        add(fetch);
+        add(new HorizontalLayout(fetch) {{
+            getStyle().set("justify-content", "center");
+            setWidthFull();
+        }});
+
+        getStyle().set("width", "75%").set("margin", "0 auto");
     }
 
     private static void showErrorNotification(IOException e) {

@@ -26,8 +26,10 @@ public class AppLayoutNavbar extends AppLayout {
     private HorizontalLayout getNavigation() {
         HorizontalLayout navigation = new HorizontalLayout();
         navigation.addClassNames(LumoUtility.JustifyContent.CENTER,
+                LumoUtility.AlignItems.CENTER,
                 LumoUtility.Gap.SMALL, LumoUtility.Height.MEDIUM,
                 LumoUtility.Width.FULL);
+
         navigation.add(
                 createLink("Pull Requests", PullsView.class),
                 createLink("Issues", IssuesView.class),
@@ -50,4 +52,3 @@ public class AppLayoutNavbar extends AppLayout {
         return link;
     }
 }
-
