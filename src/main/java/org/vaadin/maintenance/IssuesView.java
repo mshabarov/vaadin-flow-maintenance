@@ -35,17 +35,16 @@ public class IssuesView extends VerticalLayout {
 
     private final GitHubService github;
 
-    private Button fetch;
-
     public IssuesView(@Autowired GitHubService github) {
         this.github = github;
 
         FilterComponent filters = new FilterComponent();
         filters.addFilterListener(event -> {
             Filter filter = event.getFilter();
+            boolean fetch = event.isFetch();
             try {
                 accordion.getChildren().forEach(accordion::remove);
-                renderIssues(filter);
+                renderIssues(filter, fetch);
             } catch (IOException e) {
                 showErrorNotification(e);
             }
@@ -54,22 +53,6 @@ public class IssuesView extends VerticalLayout {
         add(filters);
 
         accordion.setSizeFull();
-
-        fetch = new Button("Fetch issues", click -> {
-            try {
-                renderIssues(new Filter());
-                fetch.setVisible(false);
-            } catch (IOException e) {
-                getLogger().error(e.getMessage(), e);
-                showErrorNotification(e);
-            }
-        });
-        fetch.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
-        add(new HorizontalLayout(fetch) {{
-            getStyle().set("justify-content", "center");
-            setWidthFull();
-        }});
 
         getStyle().set("width", "75%").set("margin", "0 auto");
     }
@@ -80,8 +63,8 @@ public class IssuesView extends VerticalLayout {
     }
 
     @SuppressWarnings("unchecked")
-    private void renderIssues(Filter filter) throws IOException {
-        if (issues == null) {
+    private void renderIssues(Filter filter, boolean fetch) throws IOException {
+        if (issues == null && fetch) {
             issues = new HashMap<>();
             fetchIssues(filter.isWithStarters());
         }

@@ -10,31 +10,38 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.shared.Registration;
 
-public class FilterComponent extends FormLayout {
+public class FilterComponent extends VerticalLayout {
 
+    private FormLayout form = new FormLayout();
+    private HorizontalLayout buttons = new HorizontalLayout();
     private Select<String> createdAt = new Select<>();
     private Select<String> updatedAt = new Select<>();
     private Select<Status> status = new Select<>();
     private Checkbox draft = new Checkbox(true);
     private Checkbox withStarters = new Checkbox(true);
-    private Button reset = new Button("Reset");
+    private Button reset = new Button("Reset Filters");
     private Filter filter = new Filter();
+    private Button load = new Button("Load");
 
     public FilterComponent() {
-        setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
-        setColspan(createdAt, 1);
-        setColspan(updatedAt, 1);
-        setColspan(status, 1);
-        setColspan(draft, 1);
-        setColspan(withStarters, 1);
-        setColspan(reset, 1);
-        getElement().getStyle().setBorder("1px solid lightgray");
-        getElement().getStyle().setBorderRadius("10px");
-        getElement().getStyle().setPadding("30px");
-        getElement().getStyle().setMargin("10px");
+        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
+        form.setColspan(createdAt, 1);
+        form.setColspan(updatedAt, 1);
+        form.setColspan(status, 1);
+        form.setColspan(draft, 1);
+        form.setColspan(withStarters, 1);
+        form.setColspan(reset, 1);
+        form.getElement().getStyle().setBorder("1px solid lightgray");
+        form.getElement().getStyle().setBorderRadius("10px");
+        form.getElement().getStyle().setPadding("30px");
+        form.getElement().getStyle().setMargin("10px");
+
+        buttons.getElement().getStyle().set("justify-content", "flex-end");
+        buttons.setWidthFull();
 
         createdAt.setItems("Last day", "Last 3 days", "Last week", "Last month", "All");
         createdAt.setValue("Last week");
@@ -96,6 +103,12 @@ public class FilterComponent extends FormLayout {
         reset.addThemeVariants(ButtonVariant.LUMO_PRIMARY,
                 ButtonVariant.LUMO_WARNING);
 
+        load.addClickListener(click -> {
+            fireEvent(new FilterEvent(this, filter, true));
+            load.setEnabled(false);
+        });
+        load.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
         draft.setLabel("Hide drafts");
         draft.addValueChangeListener(event -> {
            filter.setHideDraft(event.getValue());
@@ -108,11 +121,10 @@ public class FilterComponent extends FormLayout {
             // do not trigger an initial fetch when this is ticked
         });
 
-        add(createdAt, updatedAt, status, draft, withStarters);
-        add(new HorizontalLayout(reset) {{
-            getStyle().set("justify-content", "flex-end");
-            setWidthFull();
-        }});
+        form.add(createdAt, updatedAt, status, draft, withStarters);
+        buttons.add(reset, load);
+
+        add(form, buttons);
     }
 
     public Registration addFilterListener(

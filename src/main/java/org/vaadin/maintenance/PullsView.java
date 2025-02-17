@@ -14,15 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.flow.component.HtmlContainer;
 import com.vaadin.flow.component.accordion.Accordion;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -38,17 +36,16 @@ public class PullsView extends VerticalLayout {
 
     private final GitHubService github;
 
-    private Button fetch;
-
     public PullsView(@Autowired GitHubService github) {
         this.github = github;
 
         FilterComponent filters = new FilterComponent();
         filters.addFilterListener(event -> {
             Filter filter = event.getFilter();
+            boolean fetch = event.isFetch();
             try {
                 accordion.getChildren().forEach(accordion::remove);
-                renderPulls(filter);
+                renderPulls(filter, fetch);
             } catch (IOException e) {
                 getLogger().error(e.getMessage(), e);
                 showErrorNotification(e);
@@ -57,25 +54,6 @@ public class PullsView extends VerticalLayout {
 
         add(filters);
         accordion.setSizeFull();
-
-
-
-        fetch = new Button("Fetch pulls", click -> {
-            try {
-                renderPulls(new Filter());
-                fetch.setVisible(false);
-            } catch (IOException e) {
-                getLogger().error(e.getMessage(), e);
-                showErrorNotification(e);
-            }
-        });
-
-        fetch.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
-        add(new HorizontalLayout(fetch) {{
-            getStyle().set("justify-content", "center");
-            setWidthFull();
-        }});
 
         getStyle().set("width", "75%").set("margin", "0 auto");
     }
@@ -87,8 +65,8 @@ public class PullsView extends VerticalLayout {
     }
 
     @SuppressWarnings("unchecked")
-    private void renderPulls(Filter filter) throws IOException {
-        if (pulls == null) {
+    private void renderPulls(Filter filter, boolean fetch) throws IOException {
+        if (pulls == null && fetch) {
             pulls = new HashMap<>();
             fetchPulls(filter.isWithStarters());
         }
